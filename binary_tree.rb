@@ -1,6 +1,7 @@
 class BinaryTree
 	attr_reader :root
 	def initialize
+    @offenders = Array.new
 		@root = Node.new(nil, nil)
 	end
 
@@ -41,14 +42,28 @@ class BinaryTree
       if node.weight > 1
         node.weight -= 1
       else
-        if node == @root
-         @root = Node.new(nil, nil)
-        else
-          node.value = nil
-          insert_tree(node.right_child)
-          insert_tree(node.left_child)
-        end
+        merge_trees(node)
       end
+    end
+  end
+
+  def delete_offender(node_value)
+    node = search(node_value, @root)
+    merge_trees(node)
+  end
+
+  def remove_offenders
+    find_offenders(@root)
+    @offenders.each do |offender|
+      delete_offender(offender)
+    end
+  end
+
+  def find_offenders(node)
+    if !node.value.nil?
+      @offenders << node.value if node.weight >= 3
+      find_offenders(node.left_child)
+      find_offenders(node.right_child)
     end
   end
 
@@ -73,6 +88,13 @@ class BinaryTree
   end
 
 private
+
+  def merge_trees(node)
+    @root = Node.new(nil, nil) if node == @root
+    node.value = nil
+    insert_tree(node.right_child)
+    insert_tree(node.left_child)
+  end
 
 	def find_parent_node(child_node_value, potential_parent_node)
     if child_node_value > potential_parent_node.value

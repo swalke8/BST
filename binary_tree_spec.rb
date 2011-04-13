@@ -53,5 +53,19 @@ describe BinaryTree do
     @tree.search(2, @tree.root).weight.should == 2
     @tree.delete(2)
     @tree.search(2, @tree.root).weight.should == 1
+    @tree.delete(7)
+    @tree.contains?(8).should == true
+  end
+
+  it "should find nodes with a weight of 3 or more and delete them" do
+    @tree.insert(5)
+    @tree.insert(2)
+    @tree.insert(7)
+    @tree.insert(7)
+    @tree.insert(7)
+    @tree.remove_offenders
+    @tree.contains?(7).should == false
+    @tree.contains?(5).should == true
+    @tree.contains?(2).should == true
   end
 end
