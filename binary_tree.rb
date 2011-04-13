@@ -1,12 +1,12 @@
 class BinaryTree
 	attr_reader :root
 	def initialize
-		@root = Node.new(nil)
+		@root = Node.new(nil, nil)
 	end
 
 	def populate(array_of_values)
 		if @root.value == nil
-			@root = Node.new(array_of_values.shift)
+			@root = Node.new(array_of_values.shift, nil)
 		end
 
 		(0...array_length).each do |array_index|
@@ -14,59 +14,96 @@ class BinaryTree
 		end
 	end
 
-	def insert(node_value)
-		new_node = Node.new(node_value)
-		if @root.value == nil
-			@root = new_node
-		else
-			find_position(new_node, @root)
-		end
-	end
+	def insert(new_node_value)
+    if @root.value.nil?
+      @root = Node.new(new_node_value, nil)
+    else
+      find_parent_node(new_node_value, @root)
+    end
+  end
 
-  def find(node_value)
+  def contains?(node_value)
+    node = search(node_value, @root)
+    !node.nil?
+  end
 
+  def print(node)
+    if !node.value.nil?
+      puts node.value
+      print(node.right_child)
+      print(node.left_child)
+    end
+  end
+
+  def delete(node_value)
+    if contains?(node_value)
+      node = search(node_value, @root)
+      if node.weight > 1
+        node.weight -= 1
+      else
+        if node == @root
+         @root = Node.new(nil, nil)
+        else
+          node.value = nil
+          insert_tree(node.right_child)
+          insert_tree(node.left_child)
+        end
+      end
+    end
+  end
+
+  def insert_tree(node_of_existing_tree)
+    if !node_of_existing_tree.value.nil?
+      insert(node_of_existing_tree.value)
+      insert_tree(node_of_existing_tree.left_child)
+      insert_tree(node_of_existing_tree.right_child)
+    end
+  end
+
+
+  def search(value, current_node)
+    return nil if current_node.value.nil?
+    if value < current_node.value
+      search(value, current_node.left_child) 
+    elsif value > current_node.value
+      search(value, current_node.right_child)
+    else
+      return current_node
+    end
   end
 
 private
 
-	def find_position(child_node, potential_parent_node)
-		if child_node.value > potential_parent_node.value
-			if potential_parent_node.right_child.value == nil
-				potential_parent_node.right_child = child_node
-			else
-				find_position(child_node, potential_parent_node.right_child)
-			end
-		elsif child_node.value < potential_parent_node.value	
-			if potential_parent_node.left_child.value == nil
-				potential_parent_node.left_child = child_node
-			else
-				find_position(child_node, potential_parent_node.left_child)
-			end
+	def find_parent_node(child_node_value, potential_parent_node)
+    if child_node_value > potential_parent_node.value
+      if potential_parent_node.right_child.value.nil?
+        potential_parent_node.right_child = Node.new(child_node_value, potential_parent_node)
+      else
+        find_parent_node(child_node_value, potential_parent_node.right_child)
+      end
+    elsif child_node_value < potential_parent_node.value
+      if potential_parent_node.left_child.value.nil?
+        potential_parent_node.left_child = Node.new(child_node_value, potential_parent_node)
+      else
+        find_parent_node(child_node_value, potential_parent_node.left_child)
+      end
     else
       potential_parent_node.weight += 1
-		end
-	end
+    end
+  end
 end
 
 class Node
-	attr_reader :value, :left_child, :right_child
-  attr_accessor :weight
-
-	def initialize(value)
+	  attr_accessor :value, :weight, :parent, :left_child, :right_child
+	def initialize(value, parent_node)
 		@value = value
     @weight = 1
+    @parent = parent_node
 		if @value != nil
-			@left_child = Node.new(nil)
-			@right_child = Node.new(nil)
+			@left_child = Node.new(nil, self)
+			@right_child = Node.new(nil, self)
 			@children = [@left_child, @right_child]
 		end
 	end
 
-	def right_child=(node)
-		@right_child = node
-	end
-
-	def left_child=(node)
-		@left_child = node
-	end
 end
